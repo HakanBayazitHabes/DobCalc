@@ -7,13 +7,15 @@ import android.widget.DatePicker
 import android.widget.TextView
 import android.widget.Toast
 import com.hakanbayazithabes.dobcalc.databinding.ActivityMainBinding
+import java.lang.System.currentTimeMillis
 import java.text.SimpleDateFormat
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    var tvSelectedDate: TextView? = null
+    private var tvSelectedDate: TextView? = null
+    private var tvAgeInMinutes: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +25,7 @@ class MainActivity : AppCompatActivity() {
 
 
         tvSelectedDate = binding.tvSelectedDate
+        tvAgeInMinutes = binding.tvAgeInMinutes
 
         binding.btnDatePicker.setOnClickListener {
             clickDatePicker()
@@ -30,12 +33,12 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun clickDatePicker() {
+    private fun clickDatePicker() {
         val myCalendar = Calendar.getInstance()
         val year = myCalendar.get(Calendar.YEAR)
         val month = myCalendar.get(Calendar.MONTH)
         val dayOfMonth = myCalendar.get(Calendar.DAY_OF_MONTH)
-        DatePickerDialog(
+        val dpd = DatePickerDialog(
             this,
             { _, selectedYear, selectedMonth, selectedDayOfMonth ->
                 Toast.makeText(
@@ -50,10 +53,25 @@ class MainActivity : AppCompatActivity() {
                 val asd = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
 
                 val theDate = asd.parse(selectedDate)
+                theDate?.let {
+                    val selectedDateInMinutes = theDate.time / 60000
+
+                    val currentDate = asd.parse(asd.format(currentTimeMillis()))
+                    currentDate?.let {
+                        val currentDateToMinutes = currentDate.time / 60000
+
+                        val differenceInMinutes = currentDateToMinutes - selectedDateInMinutes
+
+                        tvAgeInMinutes?.text = differenceInMinutes.toString()
+                    }
+
+                }
+
 
             }, year, month, dayOfMonth
-        ).show()
+        )
+        dpd.datePicker.maxDate = currentTimeMillis() - 86400000
+        dpd.show()
 
-        Toast.makeText(this, "btnDataPicker pressed", Toast.LENGTH_SHORT).show()
     }
 }
